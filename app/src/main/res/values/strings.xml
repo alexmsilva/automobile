@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Automobile</string>
+    <string name="btn_coupe">coupe</string>
+    <string name="btn_sedan">sedan</string>
+    <string name="btn_van">van</string>
+    <string name="btn_minivan">minivan</string>
+    <string name="btn_suv">suv</string>
+    <string name="btn_truck">truck</string>
+    <string name="btn_bike">bike</string>
+    <string name="btn_boat">boat</string>
+    <string name="btn_other">other</string>
+    <string name="label_make">Make:</string>
+    <string name="label_model">Model:</string>
+    <string name="btn_save">save</string>
+</resources>
