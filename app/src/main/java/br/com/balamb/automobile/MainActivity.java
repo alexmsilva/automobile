@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> automobiles = new ArrayList<>();
     private AutomobileAdapter adapter;
+    private Database dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,17 +35,35 @@ public class MainActivity extends AppCompatActivity {
         adapter = new AutomobileAdapter();
         listView.setAdapter(adapter);
 
-        if (savedInstanceState != null) {
-            ArrayList<String> list = savedInstanceState.getStringArrayList("automobiles");
-            if (list != null) {
-                for (String s : list) {
-                    String[] strings = s.split("-");
-                    Automobile automobile = new Automobile(strings[0], strings[1]);
-                    addAutomobileToList(automobile, false);
-                }
+        dbHelper = new Database(MainActivity.this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String[] projection = {
+                DBContract.AutomobileEntry._ID,
+                DBContract.AutomobileEntry.COLUMN_MAKE,
+                DBContract.AutomobileEntry.COLUMN_MODEL
+        };
+
+        Cursor cursor = db.query(
+                DBContract.AutomobileEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null) {
+            while(cursor.moveToNext()) {
+                Automobile automobile = new Automobile(
+                        cursor.getString(cursor.getColumnIndexOrThrow(DBContract.AutomobileEntry.COLUMN_MAKE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(DBContract.AutomobileEntry.COLUMN_MODEL))
+                );
+                addAutomobileToList(automobile, false);
             }
         }
 
+        cursor.close();
     }
 
     @Override
@@ -64,8 +83,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addAutomobileToList(Automobile automobile, Boolean shouldSave) {
-        automobiles.add(String.format("%s-%s", automobile.getMake(), automobile.getModel()));
         adapter.addAutomobile(automobile);
+        if (shouldSave) {
+            dbHelper = new Database(MainActivity.this);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(DBContract.AutomobileEntry.COLUMN_MAKE, automobile.getMake());
+            values.put(DBContract.AutomobileEntry.COLUMN_MODEL, automobile.getModel());
+
+            db.insert(DBContract.AutomobileEntry.TABLE_NAME, null, values);
+        }
     }
 
     public void onClick(View view) {
